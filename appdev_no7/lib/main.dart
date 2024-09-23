@@ -16,8 +16,11 @@ class MyVocabApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScaffold()
-      
+      theme: ThemeData(
+        fontFamily: 'ComicSans', // กำหนดฟอนต์ที่เราเพิ่มไว้
+        primarySwatch: Colors.blue,
+      ),
+      home: MainScaffold(),
     );
   }
 }
@@ -43,15 +46,30 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Vocab App'),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.black,
+              child: Text(
+                'MV',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(width: 10),
+            Text('My Vocab App'),
+          ],
+        ),
         backgroundColor: Colors.lightBlue,
       ),
-      body: _pages[_currentIndex], // แสดงหน้าแต่ละหน้า
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
-        onTap: (index) async{
-          await FirebaseDatabase.instance.ref();
+        onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
@@ -78,6 +96,7 @@ class _MainScaffoldState extends State<MainScaffold> {
     );
   }
 }
+
 
 // ---------------- หน้า Setting ----------------
 
@@ -367,7 +386,7 @@ void _saveWords(List<Map<String, String>> words) {
   // อ้างอิงไปยังเส้นทาง "vocabulary/words" ใน Firebase
   DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary");
   for (var word in words) {
-    ref.push().set({
+    ref.child("Word").set({
       "word": word['word'],                 // คำศัพท์
       "translation": word['translation'],   // คำแปล
       "type": word['type'],                 // ประเภทของคำ (เช่น noun, verb)
@@ -384,7 +403,7 @@ void _addWord() {
   DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary");
 
   // การใช้ push().set() เพื่อเพิ่มข้อมูล
-  ref.push().set({
+  ref.child("Word").set({
     "word": _wordController.text,           // ข้อความจาก TextField
     "translation": _translationController.text,  // คำแปล
     "type": _selectedType,                  // ประเภทของคำ

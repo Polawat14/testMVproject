@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "262110458817",
+    "firebase_url": "https://se-project002-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "se-project002",
     "storage_bucket": "se-project002.appspot.com"
   },
@@ -27,4 +28,3 @@
   ],
   "configuration_version": "1"
 }
-
