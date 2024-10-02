@@ -1,3 +1,6 @@
+
+import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:appdev_no7/Main/main.dart'; // Assuming you are using MainScaffold in the project
 import 'register.dart'; // Import the RegisterScreen
@@ -8,9 +11,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
 
+  final FirebaseAuthService _auth = FirebaseAuthService();
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+@override
+void dispose(){
+  _emailController.dispose();
+  _passwordController.dispose();
+  super.dispose();
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             // Username TextField
             TextField(
-              controller: _usernameController,
+              controller: _emailController,
               decoration: InputDecoration(
                 labelText: 'Username',
               ),
@@ -54,22 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 20),
 
             ElevatedButton(
-              onPressed: () {
-                String username = _usernameController.text;
-                String password = _passwordController.text;
-
-                // Validate login credentials
-                if (username == 'user' && password == 'pass') {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => MainScaffold()),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Invalid username or password')),
-                  );
-                }
-              },
+             onPressed: _signIn,
               child: Text('Login'),
             ),
 
@@ -90,5 +87,18 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+  void _signIn() async {
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.SignInemailandpassword(email, password);
+
+    if (user != null){
+      print("User is successfully Signin");
+      Navigator.pushNamed(context, "/home");
+    }else{
+      print("Some error happend");
+    }
   }
 }

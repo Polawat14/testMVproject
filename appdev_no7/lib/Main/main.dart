@@ -80,10 +80,13 @@ class _MainScaffoldState extends State<MainScaffold> {
             Text('My Vocab App'),
           ],
         ),
+        
         backgroundColor: Colors.lightBlue,
       ),
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
+        
+        body: _pages[_currentIndex],
+        
+        bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -102,7 +105,7 @@ class _MainScaffoldState extends State<MainScaffold> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Vocabulary',
+            label: 'Album',
           ),
         ],
       ),
@@ -267,7 +270,7 @@ class VocabularyPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vocabulary'),
+        title: const Text('Album'),
       
         actions: [
           IconButton(

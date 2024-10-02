@@ -1,3 +1,7 @@
+import 'dart:ffi';
+
+import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -8,28 +12,21 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
 
-  void _register() {
-    // นำข้อมูลไปใช้ในการสมัครสมาชิก
-    String username = _usernameController.text;
-    String email = _emailController.text;
-    String password = _passwordController.text;
-    String confirmPassword = _confirmPasswordController.text;
+  final FirebaseAuthService _auth = FirebaseAuthService();
 
-    if (password == confirmPassword) {
-      // ทำการสมัครสมาชิกได้
-      // อาจจะทำการบันทึกข้อมูลผู้ใช้ หรือนำไปใช้ต่อ
-      print('Register Success');
-    } else {
-      // รหัสผ่านไม่ตรงกัน
-      print('Passwords do not match');
-    }
-  }
+
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+@override
+void dispose(){
+  _usernameController.dispose();
+  _emailController.dispose();
+  _passwordController.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -65,17 +62,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               obscureText: true,
             ),
-            TextField(
-              controller: _confirmPasswordController,
-              decoration: const InputDecoration(
-                labelText: 'Confirm Password',
-                prefixIcon: Icon(Icons.lock),
-              ),
-              obscureText: true,
-            ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _register,
+              onPressed: _signUp,
               child: const Text('Register'),
             ),
           ],
@@ -83,4 +72,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+  void _signUp() async {
+    String username= _usernameController.text;
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.Signupemailandpassword(email, password);
+
+    if (user != null){
+      print("User is successfully created");
+      Navigator.pushNamed(context, "/login");
+    }else{
+      print("Some error happend");
+    }
+  }
+
 }

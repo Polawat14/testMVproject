@@ -46,9 +46,9 @@ class _ManageWordsPageState extends State<ManageWordsPage> {
 
  void _saveWords(List<Map<String, String>> words) {
   // อ้างอิงไปยังเส้นทาง "vocabulary/words" ใน Firebase
-  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary");
+  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/word");
   for (var word in words) {
-    ref.child("Word").set({
+    ref.push().set({
       "word": word['word'],                 // คำศัพท์
       "translation": word['translation'],   // คำแปล
       "type": word['type'],                 // ประเภทของคำ (เช่น noun, verb)
@@ -62,10 +62,10 @@ class _ManageWordsPageState extends State<ManageWordsPage> {
 
   void _addWord() {
   // อ้างอิงไปยังเส้นทาง "vocabulary/words"
-  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary");
+  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/word");
 
   // การใช้ push().set() เพื่อเพิ่มข้อมูล
-  ref.child("Word").set({
+  ref.push().set({
     "word": _wordController.text,           // ข้อความจาก TextField
     "translation": _translationController.text,  // คำแปล
     "type": _selectedType,                  // ประเภทของคำ
