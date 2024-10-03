@@ -15,8 +15,6 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
 
   final FirebaseAuthService _auth = FirebaseAuthService();
-
-
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -74,7 +72,7 @@ void dispose(){
     );
   }
   void _signUp() async {
-    String username= _usernameController.text;
+    String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
 

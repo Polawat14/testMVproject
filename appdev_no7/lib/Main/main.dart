@@ -1,5 +1,7 @@
 import 'package:appdev_no7/Main/manage_album.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../Login & regist/login_screen.dart';
@@ -64,7 +66,7 @@ class _MainScaffoldState extends State<MainScaffold> {
         title: const Row(
           children: [
             CircleAvatar(
-              radius: 16,
+              radius: 16, 
               backgroundColor: Colors.black,
               child: Text(
                 'MV',
@@ -116,16 +118,6 @@ class _MainScaffoldState extends State<MainScaffold> {
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
 
-  void _signOut(BuildContext context) {
-    // เมื่อกดปุ่ม Sign Out, นำทางกลับไปที่หน้า LoginScreen
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-    );
-    // หากมีการจัดการ session เช่น shared preferences ก็สามารถเคลียร์ที่นี่ได้
-    // เช่น: SharedPreferences prefs = await SharedPreferences.getInstance();
-    // prefs.clear();
-  }
 
  @override
 Widget build(BuildContext context) {
@@ -148,7 +140,12 @@ Widget build(BuildContext context) {
           child: SizedBox(
             width: double.infinity, // ให้ปุ่มกว้างเต็มที่
             child: ElevatedButton(
-              onPressed: () => _signOut(context),
+              onPressed: () async {
+               await FirebaseAuth.instance.signOut(); // ต้องใส่วงเล็บเพื่อเรียกใช้งาน method
+                  Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => LoginScreen()), // นำผู้ใช้กลับไปที่หน้า Login หลังจาก sign out
+                );
+              },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white, backgroundColor: Colors.blue, // เปลี่ยนสีฟอนต์เป็นสีขาว
                 padding: const EdgeInsets.symmetric(vertical: 20), // ปรับความสูงปุ่ม
@@ -263,7 +260,7 @@ class _GamePageState extends State<GamePage> {
       body: const Center(
         child: Text(
           'Game Page',
-          style: TextStyle(fontSize: 20),
+          style: const TextStyle(fontSize: 20, fontFamily: 'ComicSans'),
         ),
       ),
     );
@@ -284,7 +281,7 @@ class _GamePageState extends State<GamePage> {
             child: Center(
               child: Text(
                 _revealed[index] ? _tiles[index] : '',
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18, fontFamily: 'ComicSans'),
               ),
             ),
           ),
@@ -296,21 +293,78 @@ class _GamePageState extends State<GamePage> {
 
 // ---------------- หน้าจัดการคำศัพท์ ----------------
 
-class VocabularyPage extends StatelessWidget {
-  const VocabularyPage({super.key});
+class VocabularyPage extends StatefulWidget {
+  const VocabularyPage({Key? key}) : super(key: key);
+
+  @override
+  _Vocabularystate createState() => _Vocabularystate();
+}
+class AlbumDetailScreen extends StatelessWidget {
+  final String albumName;
+
+  const AlbumDetailScreen({Key? key, required this.albumName}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Album'),
-      
+        title: Text(albumName), // แสดงชื่ออัลบั้ม
+      ),
+      body: Center(
+        child: Text('Details for album: $albumName'),
+      ),
+    );
+  }
+}
+
+class _Vocabularystate extends State<VocabularyPage> {
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  final User? _user = FirebaseAuth.instance.currentUser;
+  List<String> _albumNames = []; // สร้าง List เพื่อเก็บชื่ออัลบั้ม
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAlbums();  // โหลดอัลบั้มเมื่อเริ่มต้น
+  }
+
+  // ฟังก์ชันโหลดข้อมูลอัลบั้มจาก Firebase
+  void _loadAlbums() async {
+    final String userUid = _user!.uid;
+
+    _database.child('users').child(userUid).onValue.listen((event) {
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+
+      if (data != null) {
+        setState(() {
+          // ดึงชื่ออัลบั้มจาก key ของ Map และเก็บไว้ใน List
+          _albumNames = data.keys.map((key) => key.toString()).toList();
+        });
+      }
+    });
+  }
+
+  // ฟังก์ชันลบอัลบั้ม
+  void _deleteAlbum(String albumName) async {
+    final String userUid = _user!.uid;
+
+    await _database.child('users').child(userUid).child(albumName).remove(); // ลบอัลบั้มจาก Firebase
+    setState(() {
+      _albumNames.remove(albumName); // ลบอัลบั้มจาก List ในแอป
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Albums'),
         actions: [
           IconButton(
-            icon: Icon(Icons.add), // ไอคอน "+"
-            tooltip: 'Album Name',
+            icon: Icon(Icons.add), 
+            tooltip: 'Add Album',
             onPressed: () {
-              // เมื่อกดปุ่มนี้ จะไปยังหน้า manage_word_page
+              // นำทางไปหน้า CreateAlbumScreen เพื่อเพิ่มอัลบั้มใหม่
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CreateAlbumScreen()),
@@ -319,6 +373,32 @@ class VocabularyPage extends StatelessWidget {
           ),
         ],
       ),
+      body: _albumNames.isNotEmpty
+          ? ListView.builder(
+              itemCount: _albumNames.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(_albumNames[index]),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: const Color.fromARGB(255, 0, 0, 0)),
+                    onPressed: () {
+                      // ลบอัลบั้มเมื่อกดปุ่มถังขยะ
+                      _deleteAlbum(_albumNames[index]);
+                    },
+                  ),
+                  onTap: () {
+                    // เมื่อกดที่ชื่ออัลบั้ม สามารถนำทางไปหน้ารายละเอียดของอัลบั้มได้
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AlbumDetailScreen(albumName: _albumNames[index]),
+                      ),
+                    );
+                  },
+                );
+              },
+            )
+          : const Center(child: Text('No albums found')),
     );
   }
 }

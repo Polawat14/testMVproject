@@ -10,20 +10,23 @@ class CreateAlbumScreen extends StatefulWidget {
 
 class _CreateAlbumScreenState extends State<CreateAlbumScreen> {
   final TextEditingController _albumNameController = TextEditingController();
-  final DatabaseReference _database = FirebaseDatabase.instance.ref(); // สร้างอินสแตนซ์ของ Realtime Database
-  final User? _user = FirebaseAuth.instance.currentUser; // ดึงข้อมูลผู้ใช้ที่ล็อกอินอยู่
+  final DatabaseReference _database = FirebaseDatabase.instance.ref(); 
+  final User? _user = FirebaseAuth.instance.currentUser;
 
   void _addAlbum() async {
-    final albumName = _albumNameController.text.trim(); // ใช้ trim() เพื่อลบช่องว่างข้างหน้าและข้างหลัง
-    if (albumName.isNotEmpty && _user != null && _user!.email != null) { // ตรวจสอบว่าผู้ใช้ล็อกอินอยู่และมีอีเมล
-      // เพิ่มข้อมูลอัลบั้มใน Realtime Database โดยใช้ push() เพื่อสร้าง key แบบสุ่ม
-      await _database.child('albums').child(albumName).set({
-        'created_at': DateTime.now().toIso8601String(), // เก็บวันที่และเวลา
-        'user_email': _user!.email, // เก็บอีเมลของผู้ใช้
+    final albumName = _albumNameController.text.trim();
+    if (albumName.isNotEmpty && _user != null && _user!.email != null) {
+      final String userUid = _user!.uid;  // ใช้ uid ของผู้ใช้
+      final String? displayName = _user!.displayName ?? _user!.email;  // ใช้ displayName หรือ email ถ้า displayName ไม่มี
+
+      // เพิ่มข้อมูลอัลบั้มใน Realtime Database ภายใต้ userUid
+      await _database.child('users').child(userUid).child(albumName).set({
+        'created_at': DateTime.now().toIso8601String(),
+        'user_email': _user!.email,
       });
 
-      print('Album added by user: ${_user!.email}');
-      _albumNameController.clear(); // ล้างช่องกรอกชื่อหลังจากเพิ่ม
+      print('Album added by user: $displayName');
+      _albumNameController.clear();
     }
   }
 
@@ -41,7 +44,7 @@ class _CreateAlbumScreenState extends State<CreateAlbumScreen> {
               controller: _albumNameController,
               decoration: const InputDecoration(labelText: 'Album Name'),
             ),
-            const SizedBox(height: 20), // ระยะห่างก่อนปุ่ม
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _addAlbum,
               child: const Text('Add Album'),
