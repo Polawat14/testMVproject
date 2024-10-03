@@ -78,7 +78,7 @@ void dispose(){
     String password = _passwordController.text;
 
     User? user = await _auth.Signupemailandpassword(email, password);
-
+  
     if (user != null){
       print("User is successfully created");
       Navigator.pop(context);
