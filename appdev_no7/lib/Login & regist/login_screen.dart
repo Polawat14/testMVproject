@@ -96,7 +96,10 @@ void dispose(){
 
     if (user != null){
       print("User is successfully Signin");
-      Navigator.pushNamed(context, "/home");
+      Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => MainScaffold()),
+);
     }else{
       print("Some error happend");
     }

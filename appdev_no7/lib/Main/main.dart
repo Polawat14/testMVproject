@@ -1,3 +1,4 @@
+import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,13 +43,13 @@ class MyVocabApp extends StatelessWidget {
 }
 
 // ---------------- Scaffold หลักสำหรับการนำทาง ----------------
-
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
 
   @override
   _MainScaffoldState createState() => _MainScaffoldState();
 }
+
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
@@ -118,17 +119,52 @@ class _MainScaffoldState extends State<MainScaffold> {
 class SettingPage extends StatelessWidget {
   const SettingPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'Settings Page',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
+  void _signOut(BuildContext context) {
+    // เมื่อกดปุ่ม Sign Out, นำทางกลับไปที่หน้า LoginScreen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
+    // หากมีการจัดการ session เช่น shared preferences ก็สามารถเคลียร์ที่นี่ได้
+    // เช่น: SharedPreferences prefs = await SharedPreferences.getInstance();
+    // prefs.clear();
   }
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Settings Page'),
+    ),
+    body: Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: const Text(
+              'Settings Page',
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0), // Padding รอบๆปุ่ม
+          child: SizedBox(
+            width: double.infinity, // ให้ปุ่มกว้างเต็มที่
+            child: ElevatedButton(
+              onPressed: () => _signOut(context),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.blue, // เปลี่ยนสีฟอนต์เป็นสีขาว
+                padding: const EdgeInsets.symmetric(vertical: 20), // ปรับความสูงปุ่ม
+                textStyle: const TextStyle(fontSize: 18, fontFamily: 'ComicSans'), // ปรับขนาดฟอนต์
+              ),
+              child: const Text('Sign Out'),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }
 
 // ---------------- หน้าจัดการเกม ----------------

@@ -81,7 +81,7 @@ void dispose(){
 
     if (user != null){
       print("User is successfully created");
-      Navigator.pushNamed(context, "/login");
+      Navigator.pop(context);
     }else{
       print("Some error happend");
     }
