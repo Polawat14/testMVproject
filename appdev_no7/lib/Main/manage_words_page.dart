@@ -44,65 +44,62 @@ class _ManageWordsPageState extends State<ManageWordsPage> {
     }
   }
 
- void _saveWords(List<Map<String, String>> words) {
-  // อ้างอิงไปยังเส้นทาง "vocabulary/words" ใน Firebase
-  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/word");
-  for (var word in words) {
-    ref.push().set({
-      "word": word['word'],                 // คำศัพท์
-      "translation": word['translation'],   // คำแปล
-      "type": word['type'],                 // ประเภทของคำ (เช่น noun, verb)
-    }).then((_) {
-      print('Word saved successfully');      // ข้อมูลถูกบันทึกสำเร็จ
-    }).catchError((error) {
-      print('Error saving word: $error');    // กรณีมีข้อผิดพลาด
-    });
+  void _saveWordsToPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('words', json.encode(_words));
   }
-}
+
+  void _saveWordsToFirebase() {
+    DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/word");
+    for (var word in _words) {
+      ref.push().set({
+        "word": word['word'],
+        "translation": word['translation'],
+        "type": word['type'],
+      }).then((_) {
+        print('Word saved successfully');
+      }).catchError((error) {
+        print('Error saving word: $error');
+      });
+    }
+  }
 
   void _addWord() {
-  // อ้างอิงไปยังเส้นทาง "vocabulary/words"
-  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/word");
+    if (_selectedType != null &&
+        _wordController.text.isNotEmpty &&
+        _translationController.text.isNotEmpty) {
+      setState(() {
+        // เพิ่มคำใหม่ใน List
+        _words.add({
+          'word': _wordController.text,
+          'translation': _translationController.text,
+          'type': _selectedType!,
+        });
+      });
 
-  // การใช้ push().set() เพื่อเพิ่มข้อมูล
-  ref.push().set({
-    "word": _wordController.text,           // ข้อความจาก TextField
-    "translation": _translationController.text,  // คำแปล
-    "type": _selectedType,                  // ประเภทของคำ
-  }).then((_) {
-    print('Data added successfully');       // ข้อมูลถูกบันทึกสำเร็จ
-  }).catchError((error) {
-    print('Error adding data: $error');     // กรณีมีข้อผิดพลาด
-  });
-}
+      // อัปเดตข้อมูลใน SharedPreferences และ Firebase
+      _saveWordsToPreferences();
+      _saveWordsToFirebase();
 
-   void _removeWord(int index) {
-  setState(() {
-    // ลบคำจากรายการในแอปพลิเคชัน
-    _words.removeAt(index);
-  });
+      // เคลียร์ TextField หลังจากเพิ่มคำ
+      _wordController.clear();
+      _translationController.clear();
+      _selectedType = null;
+    }
+  }
 
-   // สมมุติว่าเราเก็บคีย์ไว้ในรายการ `_words` เช่น _words[index]['key']
-  String wordKey = _words as String;
+  void _removeWord(int index) {
+    setState(() {
+      _words.removeAt(index);
+    });
 
-  // อ้างอิง Firebase Realtime Database ไปยังคำที่ต้องการลบ
-  DatabaseReference ref = FirebaseDatabase.instance.ref("Vocabulary/$wordKey");
+    _saveWordsToPreferences();
+  }
 
-  // ลบคำจาก Firebase Realtime Database
-  ref.remove().then((_) {
-    print('Word removed successfully');
-  }).catchError((error) {
-    print('Error removing word: $error');
-  });
-}
-
-
- void _editWord(int index) {
-  // ตั้งค่าข้อมูลเริ่มต้นใน TextField และ Dropdown
-  _wordController.text = _words[index]['word']!;
-  _translationController.text = _words[index]['translation']!;
-  _selectedType = _words[index]['type'];
-
+  void _editWord(int index) {
+    _wordController.text = _words[index]['word']!;
+    _translationController.text = _words[index]['translation']!;
+    _selectedType = _words[index]['type'];
 
     showDialog(
       context: context,
@@ -151,6 +148,7 @@ class _ManageWordsPageState extends State<ManageWordsPage> {
                   _words[index]['translation'] = _translationController.text;
                   _words[index]['type'] = _selectedType!;
                 });
+                _saveWordsToPreferences();
                 Navigator.of(context).pop();
               },
             ),
@@ -196,7 +194,11 @@ class _ManageWordsPageState extends State<ManageWordsPage> {
                   }).toList(),
                 ),
                 ElevatedButton(
-                  onPressed: _addWord,
+                  onPressed: _selectedType == null ||
+                          _wordController.text.isEmpty ||
+                          _translationController.text.isEmpty
+                      ? null
+                      : _addWord,
                   child: const Text('Add Word'),
                 ),
               ],

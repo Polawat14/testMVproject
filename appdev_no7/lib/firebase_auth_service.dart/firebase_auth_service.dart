@@ -26,13 +26,4 @@ class FirebaseAuthService {
     }
     return null;
   }
-
-  static void signOut() {}
-
-
-
-
-
-
-  
 }

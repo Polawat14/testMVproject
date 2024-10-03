@@ -1,12 +1,8 @@
 import 'package:appdev_no7/Main/manage_album.dart';
-import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 import 'dart:math';
 import '../Login & regist/login_screen.dart';
-import 'manage_words_page.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -312,7 +308,7 @@ class VocabularyPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.add), // ไอคอน "+"
-            tooltip: 'Create Album',
+            tooltip: 'Album Name',
             onPressed: () {
               // เมื่อกดปุ่มนี้ จะไปยังหน้า manage_word_page
               Navigator.push(

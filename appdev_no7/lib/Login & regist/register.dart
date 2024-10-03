@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:appdev_no7/Login%20&%20regist/login_screen.dart';
 import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -78,10 +79,13 @@ void dispose(){
     String password = _passwordController.text;
 
     User? user = await _auth.Signupemailandpassword(email, password);
-  
+
     if (user != null){
       print("User is successfully created");
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => LoginScreen()),
+);
     }else{
       print("Some error happend");
     }

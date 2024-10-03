@@ -50,7 +50,7 @@ void dispose(){
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: 'Email',
               ),
             ),
 
