@@ -49,14 +49,14 @@ class MainScaffold extends StatefulWidget {
   _MainScaffoldState createState() => _MainScaffoldState();
 }
 
-
 class _MainScaffoldState extends State<MainScaffold> {
-  int _currentIndex = 0;
+  // Set initial index to 2 to show VocabularyPage first
+  int _currentIndex = 2;  // <- Changed from 0 to 2
 
   final List<Widget> _pages = [
     SettingPage(),
     GamePage(),
-    VocabularyPage(),
+    VocabularyPage(),  // VocabularyPage is at index 2
   ];
 
   @override
@@ -80,13 +80,10 @@ class _MainScaffoldState extends State<MainScaffold> {
             Text('My Vocab App'),
           ],
         ),
-        
         backgroundColor: Colors.lightBlue,
       ),
-        
-        body: _pages[_currentIndex],
-        
-        bottomNavigationBar: BottomNavigationBar(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -113,53 +110,164 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 }
 
-// ---------------- หน้า Setting ----------------
-
-class SettingPage extends StatelessWidget {
+// ---------------- Updated Setting Page ----------------
+class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
 
+  @override
+  _SettingPageState createState() => _SettingPageState();
+}
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('Settings Page'),
-    ),
-    body: Column(
-      children: [
-        Expanded(
-          child: Center(
-            child: const Text(
-              'Settings Page',
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0), // Padding รอบๆปุ่ม
-          child: SizedBox(
-            width: double.infinity, // ให้ปุ่มกว้างเต็มที่
-            child: ElevatedButton(
-              onPressed: () async {
-               await FirebaseAuth.instance.signOut(); // ต้องใส่วงเล็บเพื่อเรียกใช้งาน method
-                  Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => LoginScreen()), // นำผู้ใช้กลับไปที่หน้า Login หลังจาก sign out
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue, // เปลี่ยนสีฟอนต์เป็นสีขาว
-                padding: const EdgeInsets.symmetric(vertical: 20), // ปรับความสูงปุ่ม
-                textStyle: const TextStyle(fontSize: 18, fontFamily: 'ComicSans'), // ปรับขนาดฟอนต์
+class _SettingPageState extends State<SettingPage> {
+  double _volume = 50;
+  String _selectedTheme = 'Blue Pastel';
+  String _selectedLanguage = 'ENGLISH';
+
+  List<String> themes = ['Blue Pastel', 'Dark Mode', 'Light Mode'];
+  List<String> languages = ['ENGLISH', 'FRENCH', 'SPANISH'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Settings"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Text(
+                      "SETTINGS",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 5.0,
+                            color: Colors.black,
+                            offset: Offset(2.0, 2.0),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    // Volume Control
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Volume", style: TextStyle(fontSize: 18)),
+                        Expanded(
+                          child: Slider(
+                            value: _volume,
+                            min: 0,
+                            max: 100,
+                            divisions: 100,
+                            label: _volume.round().toString(),
+                            onChanged: (value) {
+                              setState(() {
+                                _volume = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    // Theme Selection
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Theme", style: TextStyle(fontSize: 18)),
+                        DropdownButton<String>(
+                          value: _selectedTheme,
+                          items: themes.map((String theme) {
+                            return DropdownMenuItem<String>(
+                              value: theme,
+                              child: Text(theme),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedTheme = newValue!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    // Language Selection
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("App Language", style: TextStyle(fontSize: 18)),
+                        DropdownButton<String>(
+                          value: _selectedLanguage,
+                          items: languages.map((String language) {
+                            return DropdownMenuItem<String>(
+                              value: language,
+                              child: Row(
+                                children: [
+                                  Text(language),
+                                  const SizedBox(width: 8),
+                                  if (language == 'ENGLISH')
+                                    const Icon(Icons.flag, color: Colors.red),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedLanguage = newValue!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 50),
+                  ],
+                ),
               ),
-              child: const Text('Sign Out'),
             ),
-          ),
+            // Sign Out Button
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'ComicSans',
+                    ),
+                  ),
+                  child: const Text('Sign Out'),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
-}
+
 
 // ---------------- หน้าจัดการเกม ----------------
 
@@ -255,12 +363,20 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Word Matching Game'),
+        title: const Text('เกมจับคู่คำศัพท์'),
       ),
-      body: const Center(
-        child: Text(
-          'Game Page',
-          style: const TextStyle(fontSize: 20, fontFamily: 'ComicSans'),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: _buildGrid(), // แสดงตาราง
+            ),
+            ElevatedButton(
+              onPressed: _setupGame,
+              child: const Text('เริ่มเกมใหม่'),
+            ),
+          ],
         ),
       ),
     );
@@ -270,7 +386,7 @@ class _GamePageState extends State<GamePage> {
     return GridView.builder(
       shrinkWrap: true,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // Change to 4 columns for 4x4 grid
+        crossAxisCount: 4, // ตาราง 4x4
       ),
       itemCount: _tiles.length,
       itemBuilder: (context, index) {
@@ -281,7 +397,7 @@ class _GamePageState extends State<GamePage> {
             child: Center(
               child: Text(
                 _revealed[index] ? _tiles[index] : '',
-                style: const TextStyle(fontSize: 18, fontFamily: 'ComicSans'),
+                style: const TextStyle(fontSize: 18),
               ),
             ),
           ),
@@ -290,7 +406,6 @@ class _GamePageState extends State<GamePage> {
     );
   }
 }
-
 // ---------------- หน้าจัดการคำศัพท์ ----------------
 
 class VocabularyPage extends StatefulWidget {
@@ -308,7 +423,7 @@ class AlbumDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(albumName), // แสดงชื่ออัลบั้ม
+        title: Text(albumName), 
       ),
       body: Center(
         child: Text('Details for album: $albumName'),
@@ -320,15 +435,14 @@ class AlbumDetailScreen extends StatelessWidget {
 class _Vocabularystate extends State<VocabularyPage> {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   final User? _user = FirebaseAuth.instance.currentUser;
-  List<String> _albumNames = []; // สร้าง List เพื่อเก็บชื่ออัลบั้ม
+  List<String> _albumNames = []; 
 
   @override
   void initState() {
     super.initState();
-    _loadAlbums();  // โหลดอัลบั้มเมื่อเริ่มต้น
+    _loadAlbums();  
   }
 
-  // ฟังก์ชันโหลดข้อมูลอัลบั้มจาก Firebase
   void _loadAlbums() async {
     final String userUid = _user!.uid;
 
@@ -337,20 +451,18 @@ class _Vocabularystate extends State<VocabularyPage> {
 
       if (data != null) {
         setState(() {
-          // ดึงชื่ออัลบั้มจาก key ของ Map และเก็บไว้ใน List
           _albumNames = data.keys.map((key) => key.toString()).toList();
         });
       }
     });
   }
 
-  // ฟังก์ชันลบอัลบั้ม
   void _deleteAlbum(String albumName) async {
     final String userUid = _user!.uid;
 
-    await _database.child('users').child(userUid).child(albumName).remove(); // ลบอัลบั้มจาก Firebase
+    await _database.child('users').child(userUid).child(albumName).remove(); 
     setState(() {
-      _albumNames.remove(albumName); // ลบอัลบั้มจาก List ในแอป
+      _albumNames.remove(albumName); 
     });
   }
 
@@ -364,7 +476,6 @@ class _Vocabularystate extends State<VocabularyPage> {
             icon: Icon(Icons.add), 
             tooltip: 'Add Album',
             onPressed: () {
-              // นำทางไปหน้า CreateAlbumScreen เพื่อเพิ่มอัลบั้มใหม่
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => CreateAlbumScreen()),
@@ -382,12 +493,10 @@ class _Vocabularystate extends State<VocabularyPage> {
                   trailing: IconButton(
                     icon: Icon(Icons.delete, color: const Color.fromARGB(255, 0, 0, 0)),
                     onPressed: () {
-                      // ลบอัลบั้มเมื่อกดปุ่มถังขยะ
                       _deleteAlbum(_albumNames[index]);
                     },
                   ),
                   onTap: () {
-                    // เมื่อกดที่ชื่ออัลบั้ม สามารถนำทางไปหน้ารายละเอียดของอัลบั้มได้
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -401,4 +510,4 @@ class _Vocabularystate extends State<VocabularyPage> {
           : const Center(child: Text('No albums found')),
     );
   }
-}
+}  

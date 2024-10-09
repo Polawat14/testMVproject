@@ -1,5 +1,4 @@
 import 'dart:ffi';
-
 import 'package:appdev_no7/Login%20&%20regist/login_screen.dart';
 import 'package:appdev_no7/firebase_auth_service.dart/firebase_auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -80,9 +79,9 @@ void dispose(){
 
     if (user != null){
       print("User is successfully created");
-      Navigator.pushReplacement(
+      Navigator.popUntil(
   context,
-  MaterialPageRoute(builder: (context) => LoginScreen()),
+  MaterialPageRoute(builder: (context) => LoginScreen()) as RoutePredicate,
 );
     }else{
       print("Some error happend");

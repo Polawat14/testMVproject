@@ -17,19 +17,21 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
-@override
-void dispose(){
-  _emailController.dispose();
-  _passwordController.dispose();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('MyVocab'),
       ),
-      body: Padding(
+      resizeToAvoidBottomInset: true, // Prevents overflow when keyboard appears
+      body: SingleChildScrollView( // Wrap Column with SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -43,7 +45,7 @@ void dispose(){
                 width: 200,
               ),
             ),
-
+            
             SizedBox(height: 20),
 
             // Username TextField
@@ -66,7 +68,7 @@ void dispose(){
             SizedBox(height: 20),
 
             ElevatedButton(
-             onPressed: _signIn,
+              onPressed: _signIn,
               child: Text('Login'),
             ),
 
@@ -88,20 +90,21 @@ void dispose(){
       ),
     );
   }
+
   void _signIn() async {
     String email = _emailController.text;
     String password = _passwordController.text;
 
     User? user = await _auth.SignInemailandpassword(email, password);
 
-    if (user != null){
+    if (user != null) {
       print("User is successfully Signin");
       Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MainScaffold()),
-);
-    }else{
-      print("Some error happend");
+        context,
+        MaterialPageRoute(builder: (context) => MainScaffold()),
+      );
+    } else {
+      print("Some error happened");
     }
   }
 }
